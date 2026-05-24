@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRE Dashboard | Academic Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="toast-container"></div>
+
+    <header class="main-header">
+        <div class="container">
+            <div class="brand">
+                <i data-lucide="activity"></i>
+                <h1>Observability Lab <span>v1.0</span></h1>
+            </div>
+            <div class="system-time" id="clock">--:--:--</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Top Section: Controls & Monitor -->
+        <div class="dashboard-grid">
+            
+            <!-- Area 1: Register -->
+            <section class="card">
+                <div class="card-header blue">
+                    <i data-lucide="user-plus"></i>
+                    <h2>Registro de Usuário</h2>
+                </div>
+                <form id="reg-form" class="card-body">
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="reg-name" placeholder="Ex: Ana Silva" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="reg-email" placeholder="ana@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="reg-pass" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-blue">Registrar Membro</button>
+                </form>
+            </section>
+
+            <!-- Area 2: Login -->
+            <section class="card">
+                <div class="card-header green">
+                    <i data-lucide="log-in"></i>
+                    <h2>Acesso ao Sistema</h2>
+                </div>
+                <form id="log-form" class="card-body">
+                    <div class="form-group">
+                        <label>E-mail Corporativo</label>
+                        <input type="email" id="log-email" placeholder="usuario@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="log-pass" placeholder="••••••••" required>
+                    </div>
+                    <div class="spacer"></div>
+                    <button type="submit" class="btn btn-green">Efetuar Login</button>
+                    <button type="button" class="btn btn-outline" id="btn-force-error">Simular Erro 500</button>
+                </form>
+            </section>
+
+            <!-- Area 3: Monitor Operacional -->
+            <section class="card monitor-card">
+                <div class="card-header orange">
+                    <i data-lucide="terminal"></i>
+                    <h2>Monitor Operacional</h2>
+                </div>
+                <div class="card-body">
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <span class="label">API Status</span>
+                            <span class="value success">ONLINE</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Usuários</span>
+                            <span class="value" id="count-users">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Erros (Session)</span>
+                            <span class="value danger" id="count-errors">0</span>
+                        </div>
+                    </div>
+                    <div class="log-viewer">
+                        <div class="log-header">Últimos Eventos (Interface)</div>
+                        <div id="log-feed" class="log-feed">
+                            <div class="log-item info">Aguardando interações...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Area 4: Tabela de Usuários -->
+        <section class="card table-card">
+            <div class="card-header">
+                <div class="header-left">
+                    <i data-lucide="database"></i>
+                    <h2>Banco de Dados (In-Memory)</h2>
+                </div>
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="user-search" placeholder="Filtrar por nome ou e-mail...">
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID da Requisição</th>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Status</th>
+                            <th class="text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list">
+                        <!-- Conteúdo via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="modal-overlay" class="overlay">
+        <div class="card modal-content">
+            <div class="card-header">
+                <h2>Editar Membro</h2>
+                <button class="icon-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
+            </div>
+            <form id="edit-form" class="card-body">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="edit-email" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-blue">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>lucide.createIcons();</script>
+    <script src="app.js"></script>
+</body>
+</html>
