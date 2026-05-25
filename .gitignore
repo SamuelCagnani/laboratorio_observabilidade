@@ -30,3 +30,14 @@ Thumbs.db
 app/node_modules/
 dist/
 build/
+
+# Docker persistent data (Volumes locais se houver)
+data/
+prometheus-data/
+loki-data/
+grafana-storage/
+
+# Presentation and scripts
+comandos.txt
+dashboard-export/*.json
+!dashboard-export/dashboard.json # Mantém apenas o principal se desejar

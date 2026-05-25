@@ -1,0 +1,109 @@
+services:
+  app:
+    build: .
+    container_name: nexus-app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - obs-network
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: "json-file"
+      options:
+        tag: "{{.Name}}"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nexus-prometheus
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=1d'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - obs-network
+    mem_limit: 512m
+    cpus: 0.5
+
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: nexus-loki
+    user: "0:0"
+    volumes:
+      - ./config/loki/config.yml:/etc/loki/config.yml
+      - loki-data:/tmp/loki
+    command: -config.file=/etc/loki/config.yml
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    networks:
+      - obs-network
+    mem_limit: 512m
+    cpus: 0.5
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: nexus-promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/promtail/config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+    networks:
+      - obs-network
+    mem_limit: 128m
+    cpus: 0.2
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexus-grafana
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - obs-network
+    mem_limit: 512m
+    cpus: 0.5
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: nexus-node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+    networks:
+      - obs-network
+    mem_limit: 64m
+    cpus: 0.1
+
+networks:
+  obs-network:
+    driver: bridge
+
+volumes:
+  grafana-storage:
+  prometheus-data:
+  loki-data:
